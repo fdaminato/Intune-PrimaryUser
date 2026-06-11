@@ -16,7 +16,7 @@
     5.0.2504.2 - Bug fixing and error and throttling handling
     5.1.2504.3 - Changed sorting and selecting from the sign-in logs and overall performance improvements
     6.0.2510.1 - A complete rewrite of the processes due to changes in Microsoft Graph, now 10x faster and more reliable 
-    6.0.2510.2 - Added Florian logging function throughout the script to better track execution and errors
+    6.0.2510.2 - Added fdaminato logging function throughout the script to better track execution and errors
     6.0.2510.3 - Improved logic and performance of the user sign-in data processing
     6.0.2510.4 - Added a fallback for windows devices with no Windows sign-in logs, to use application sign-in logs instead
     6.0.2510.5 - New parameters for keep and replace accounts
@@ -68,7 +68,7 @@
     Please feel free to use this, but make sure to credit @fdaminato as the original author
 
 .LINK
-    https://fdaminato
+    https://github.com/fdaminato/Intune-PrimaryUser
 #>
 
 #region ---------------------------------------------------[Set Script Requirements]-----------------------------------------------
@@ -90,16 +90,16 @@ param(
     [Parameter(Mandatory = $false,          HelpMessage = "Filter Intune only managed devices (true) or also include Co-managed devices (false). Default is true")]
     [bool]$IntuneOnly               = $true,
 
-    [Parameter(Mandatory = $false,          HelpMessage = "Filter to only include devicenames that starts with specific strings like ('fdaminato', 'Desktop'). Default is blank")]
+    [Parameter(Mandatory = $false,          HelpMessage = "Filter to only include devicenames that starts with specific strings like ('FDaminato', 'Desktop'). Default is blank")]
     [string[]]$IncludedDeviceNames  = @(),
 
-    [Parameter(Mandatory = $false,          HelpMessage = "Filter to exclude devicenames that starts with specific strings like ('fdaminato', 'Desktop'). Default is blank")]
+    [Parameter(Mandatory = $false,          HelpMessage = "Filter to exclude devicenames that starts with specific strings like ('FDaminato', 'Desktop'). Default is blank")]
     [string[]]$ExcludedDeviceNames  = @(),
 
-    [Parameter(Mandatory = $false,          HelpMessage = "Filter to exclude specific accounts as primary owners for example enrollment accounts ('wds@fdaminato','install@fdaminato'). Default is blank")]
+    [Parameter(Mandatory = $false,          HelpMessage = "Filter to exclude specific accounts as primary owners for example enrollment accounts ('wds@FDaminato.ca','install@FDaminato.ca'). Default is blank")]
     [string[]]$ReplaceUserAccounts  = @(),
 
-    [Parameter(Mandatory = $false,          HelpMessage = "Filter to keep specific accounts that always should be keept as primary owners ('Monitoring@fdaminato'). Default is blank")]
+    [Parameter(Mandatory = $false,          HelpMessage = "Filter to keep specific accounts that always should be keept as primary owners ('Monitoring@FDaminato.ca'). Default is blank")]
     [string[]]$KeepUserAccounts     = @(),
 
     [Parameter(Mandatory = $false,          HelpMessage = "Time period in days to retrieve user sign-in activity logs. Default is 30 days")]
@@ -139,7 +139,7 @@ param(
     
     [Parameter(                             HelpMessage = "Password for certificate file as SecureString (required if certificate is stored as a file and password-protected)")]
     [SecureString]$AuthCertPassword,
-# ==========> Logging (Invoke-fdaminatoLog) <==============================================================================
+# ==========> Logging (Invoke-FDaminatoLog) <==============================================================================
     [Parameter(Mandatory = $false,          HelpMessage='Name of Log, to set name for Eventlog and Filelog')]
     [string]$LogName                = "",
 
@@ -245,7 +245,7 @@ if (-not (Get-Module -Name $ModuleName)) {
 #endregion
 
 #region ---------------------------------------------------[Static Variables]------------------------------------------------------
-# ==========> Logging (Invoke-fdaminatoLog) <==============================================================================
+# ==========> Logging (Invoke-FDaminatoLog) <==============================================================================
 if([string]::IsNullOrWhiteSpace($LogName)) {[string]$LogName = $ScriptActionName}           # Logname defaults to script action name
 # ==========> Reporting (Invoke-ScriptReport) <========================================================================
 if([string]::IsNullOrWhiteSpace($ReportTitle)) {[string]$ReportTitle = $ScriptActionName}   # Report title defaults to script action name
@@ -519,7 +519,7 @@ function Invoke-ConnectMgGraph {
         Write-Verbose "Function finished. Memory usage: $MemoryUsage MB"
     }
 }
-function Invoke-fdaminatoLog { 
+function Invoke-FDaminatoLog { 
 <#
 .SYNOPSIS
     Unified tiny logger for PowerShell 5.1–7.5 and Azure Automation; overrides Write-* cmdlets and stores all messages in-memory
@@ -1359,6 +1359,8 @@ function Invoke-ScriptReport {
     Then use this to log report actions during processing:
         & $addReport -Target "Device001" -OldValue "Enabled" -NewValue "Disabled" -Action "Disabled" -Details "Optional info"
 .NOTES
+    Author:  @fdaminato (Florian Daminato)
+    Version: 2.0
     
     Version History:
     1.0 - Initial version
@@ -1543,8 +1545,8 @@ function Invoke-ScriptReport {
 #endregion
 
 #region ---------------------------------------------------[[Script Execution]------------------------------------------------------
-# Start Florian custom logging (can be removed if you don't want to use Florian logging)
-Invoke-fdaminatoLog -LogMode Start -Logname $LogName -LogToGUI $LogToGUI -LogToEventlog $LogToEventlog -LogEventIds $LogEventIds -LogToDisk $LogToDiskPath -LogToHost $LogToHost
+# Start fdaminato custom logging (can be removed if you don't want to use fdaminato logging)
+Invoke-FDaminatoLog -LogMode Start -Logname $LogName -LogToGUI $LogToGUI -LogToEventlog $LogToEventlog -LogEventIds $LogEventIds -LogToDisk $LogToDisk -LogPath $LogToDiskPath -LogToHost $LogToHost
 
 Write-Host "[START] $ScriptActionName started. Testmode=$Testmode | OS=$($OperatingSystems -join ',') | DeviceTimeSpan=$DeviceTimeSpan days | SignInsTimeSpan=$SignInsTimeSpan days | IntuneOnly=$IntuneOnly"
 if ($IncludedDeviceNames -and $IncludedDeviceNames.Count -gt 0) { Write-Host "[FILTER] Included device name prefix(es): $($IncludedDeviceNames -join ', ')" }
@@ -2027,8 +2029,8 @@ finally { #End Script and restore preferences
     $ErrorActionPreference  = $script:OriginalErrorActionPreference
     $VerbosePreference      = $script:OriginalVerbosePreference
     $WhatIfPreference       = $script:OriginalWhatIfPreference
-    # End Florian custom logging
-    Invoke-fdaminatoLog -LogMode Stop
+    # End fdaminato custom logging
+    Invoke-FDaminatoLog -LogMode Stop
     # Generate report if requested
     if ($ReportEnabled) {
         Invoke-ScriptReport -ReportTitle $ReportTitle -ReportResults $ReportResults -ReportStartTime $ReportStartTime -ReportDetailed $ReportDetailed -ReportToDisk $ReportToDisk -ReportToDiskPath $ReportToDiskPath
@@ -2038,3 +2040,6 @@ finally { #End Script and restore preferences
     Write-Verbose "Script finished. Memory usage: $MemoryUsage MB"
 }
 #endregion
+
+
+
