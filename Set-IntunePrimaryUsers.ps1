@@ -65,7 +65,7 @@
     Sets primary user for Windows devices based on sign-ins and device activity in the last 7 days.
 
 .EXAMPLE
-    .\Set-IntunePrimaryUsers.ps1 -Testmode $true -IncludedDeviceNames "LAP-"
+    .\Set-IntunePrimaryUsers.ps1 -OperatingSystems Windows -IncludedDeviceNames "LAP-"
     Sets primary user for Windows devices based on a specific prefix.
 
 .NOTES
