@@ -64,6 +64,10 @@
     .\Set-IntunePrimaryUsers.ps1 -OperatingSystems Windows -SignInsTimeSpan 7 -DeviceTimeSpan 7
     Sets primary user for Windows devices based on sign-ins and device activity in the last 7 days.
 
+.EXAMPLE
+    .\Set-IntunePrimaryUsers.ps1 -Testmode $true -IncludedDeviceNames "LAP-"
+    Sets primary user for Windows devices based on a specific prefix.
+
 .NOTES
     Please feel free to use this, but make sure to credit @fdaminato as the original author
 
